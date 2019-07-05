@@ -40,6 +40,12 @@
   <PropertyGroup>
     <DelaySign>false</DelaySign>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>LVCSign.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="AxisCore.cs" />
     <Compile Include="AxisOrientation.cs" />
@@ -157,6 +163,10 @@
     <Compile Include="UpdaterState.cs" />
     <Compile Include="VisualElementsCollection.cs" />
     <Compile Include="ZoomingOptions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="LiveCharts.snk" />
+    <None Include="LVCSign.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
