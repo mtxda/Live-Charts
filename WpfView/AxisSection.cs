@@ -48,13 +48,27 @@ namespace LiveCharts.Wpf
         public AxisSection()
         {
             _rectangle = new Rectangle();
-            
+
             _rectangle.MouseDown += (sender, args) =>
             {
                 if (!Draggable) return;
                 Dragging = this;
+
+                _rectangle.CaptureMouse();
+
                 args.Handled = true;
                 Chart.Ldsp = null;
+            };
+
+            _rectangle.MouseUp += (sender, args) =>
+            {
+                if (!Draggable) return;
+                Dragging = null;
+
+                if (_rectangle.IsMouseCaptured)
+                    _rectangle.ReleaseMouseCapture();
+
+                args.Handled = true;
             };
 
             SetCurrentValue(StrokeProperty, new SolidColorBrush(Color.FromRgb(131, 172, 191)));

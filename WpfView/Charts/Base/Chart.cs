@@ -198,7 +198,7 @@ namespace LiveCharts.Wpf.Charts.Base
         public event UpdaterTickHandler UpdaterTick;
         #endregion
 
-        #region Commands        
+        #region Commands
         /// <summary>
         /// The data click command property
         /// </summary>
@@ -286,7 +286,7 @@ namespace LiveCharts.Wpf.Charts.Base
         public static readonly DependencyProperty SeriesColorsProperty = DependencyProperty.Register(
             "SeriesColors", typeof(ColorsCollection), typeof(Chart), new PropertyMetadata(default(ColorsCollection)));
         /// <summary>
-        /// Gets or sets 
+        /// Gets or sets
         /// </summary>
         public ColorsCollection SeriesColors
         {
@@ -467,7 +467,7 @@ namespace LiveCharts.Wpf.Charts.Base
         /// The scroll mode property
         /// </summary>
         public static readonly DependencyProperty ScrollModeProperty = DependencyProperty.Register(
-            "ScrollMode", typeof(ScrollMode), typeof(Chart), 
+            "ScrollMode", typeof(ScrollMode), typeof(Chart),
             new PropertyMetadata(ScrollMode.None, ScrollModeOnChanged));
         /// <summary>
         /// Gets or sets chart scroll mode
@@ -482,7 +482,7 @@ namespace LiveCharts.Wpf.Charts.Base
         /// The scroll horizontal from property
         /// </summary>
         public static readonly DependencyProperty ScrollHorizontalFromProperty = DependencyProperty.Register(
-            "ScrollHorizontalFrom", typeof(double), typeof(Chart), 
+            "ScrollHorizontalFrom", typeof(double), typeof(Chart),
             new PropertyMetadata(default(double), ScrollLimitOnChanged));
         /// <summary>
         /// Gets or sets the scrolling horizontal start value
@@ -497,7 +497,7 @@ namespace LiveCharts.Wpf.Charts.Base
         /// The scroll horizontal to property
         /// </summary>
         public static readonly DependencyProperty ScrollHorizontalToProperty = DependencyProperty.Register(
-            "ScrollHorizontalTo", typeof(double), typeof(Chart), 
+            "ScrollHorizontalTo", typeof(double), typeof(Chart),
             new PropertyMetadata(default(double),  ScrollLimitOnChanged));
         /// <summary>
         /// Gets or sets the scrolling horizontal end value
@@ -568,7 +568,7 @@ namespace LiveCharts.Wpf.Charts.Base
         /// The updater state property
         /// </summary>
         public static readonly DependencyProperty UpdaterStateProperty = DependencyProperty.Register(
-            "UpdaterState", typeof(UpdaterState), typeof(Chart), 
+            "UpdaterState", typeof(UpdaterState), typeof(Chart),
             new PropertyMetadata(default(UpdaterState), CallChartUpdater()));
         /// <summary>
         /// Gets or sets chart's updater state
@@ -1242,6 +1242,9 @@ namespace LiveCharts.Wpf.Charts.Base
             if (Model == null || Model.AxisX == null || Model.AxisY == null) return;
 
             DragOrigin = e.GetPosition(this);
+
+            DrawMargin.CaptureMouse();
+
             IsPanning = true;
         }
 
@@ -1261,6 +1264,10 @@ namespace LiveCharts.Wpf.Charts.Base
         private void OnDraggingEnd(object sender, MouseButtonEventArgs e)
         {
             if (!IsPanning) return;
+
+            if (DrawMargin.IsMouseCaptured)
+                DrawMargin.ReleaseMouseCapture();
+
             IsPanning = false;
         }
         #endregion
@@ -1397,14 +1404,34 @@ namespace LiveCharts.Wpf.Charts.Base
                 delta = this.ConvertToChartValues(new Point(Ldsp.Value.X, 0), ax.Model.AxisIndex).X -
                         this.ConvertToChartValues(new Point(p.X, 0), ax.Model.AxisIndex).X;
                 Ldsp = p;
-                ax.Value -= delta;
+
+                var newAxisValue = ax.Value - delta;
+
+                var currentAxis = this.AxisX[ax.Model.AxisIndex];
+
+                if (newAxisValue < currentAxis.ActualMinValue)
+                    ax.Value = currentAxis.ActualMinValue;
+                else if (newAxisValue > currentAxis.ActualMaxValue)
+                    ax.Value = currentAxis.ActualMaxValue;
+                else
+                    ax.Value = newAxisValue;
             }
             else
             {
                 delta = this.ConvertToChartValues(new Point(0, Ldsp.Value.Y), 0, ax.Model.AxisIndex).Y -
                         this.ConvertToChartValues(new Point(0, p.Y), 0, ax.Model.AxisIndex).Y;
                 Ldsp = p;
-                ax.Value -= delta;
+
+                var newAxisValue = ax.Value - delta;
+
+                var currentAxis = this.AxisY[ax.Model.AxisIndex];
+
+                if (newAxisValue < currentAxis.ActualMinValue)
+                    ax.Value = currentAxis.ActualMinValue;
+                else if (newAxisValue > currentAxis.ActualMaxValue)
+                    ax.Value = currentAxis.ActualMaxValue;
+                else
+                    ax.Value = newAxisValue;
             }
         }
 
