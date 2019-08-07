@@ -20,9 +20,11 @@
 
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
@@ -69,11 +71,23 @@ namespace LiveCharts.Wpf
                     _rectangle.ReleaseMouseCapture();
 
                 args.Handled = true;
+
+                OnDragFinished();
             };
 
             SetCurrentValue(StrokeProperty, new SolidColorBrush(Color.FromRgb(131, 172, 191)));
             SetCurrentValue(FillProperty, new SolidColorBrush(Color.FromRgb(131, 172, 191)) {Opacity = .35});
             SetCurrentValue(StrokeThicknessProperty, 0d);
+        }
+
+        /// <summary>
+        /// Invoked after an axis section has been manually dragged.
+        /// </summary>
+        public event EventHandler DragFinished;
+
+        internal void OnDragFinished()
+        {
+            DragFinished?.Invoke(this, EventArgs.Empty);
         }
 
         #region Properties
@@ -310,6 +324,15 @@ namespace LiveCharts.Wpf
             _rectangle.Stroke = Stroke;
             _rectangle.StrokeDashArray = StrokeDashArray;
             _rectangle.StrokeThickness = StrokeThickness;
+
+            if (Draggable)
+            {
+                if (source == AxisOrientation.X)
+                    _rectangle.Cursor = Cursors.SizeWE;
+                else
+                    _rectangle.Cursor = Cursors.SizeNS;
+            }
+
             Panel.SetZIndex(_rectangle, Panel.GetZIndex(this));
             BindingOperations.SetBinding(_rectangle, VisibilityProperty,
                 new Binding {Path = new PropertyPath(VisibilityProperty), Source = this});
@@ -355,6 +378,37 @@ namespace LiveCharts.Wpf
                 if (DataLabelForeground != null) _label.Foreground = DataLabelForeground;
                 _label.UpdateLayout();
                 _label.Background = Stroke ?? Fill;
+
+                _label.MouseDown += (sender, args) =>
+                {
+                    if (!Draggable) return;
+                    Dragging = this;
+
+                    _label.CaptureMouse();
+
+                    args.Handled = true;
+                    Chart.Ldsp = null;
+                };
+
+                _label.MouseUp += (sender, args) =>
+                {
+                    if (!Draggable) return;
+                    Dragging = null;
+
+                    if (_label.IsMouseCaptured)
+                        _label.ReleaseMouseCapture();
+
+                    args.Handled = true;
+                };
+
+                if (Draggable)
+                {
+                    if (source == AxisOrientation.X)
+                        _label.Cursor = Cursors.SizeWE;
+                    else
+                        _label.Cursor = Cursors.SizeNS;
+                }
+
                 PlaceLabel(ax.GetFormatter()(Value), ax, source);
             }
 
@@ -397,6 +451,11 @@ namespace LiveCharts.Wpf
                 _rectangle.BeginAnimation(HeightProperty, new DoubleAnimation(h, anSpeed));
             }
         }
+
+
+
+
+
 
         /// <summary>
         /// Removes this instance.

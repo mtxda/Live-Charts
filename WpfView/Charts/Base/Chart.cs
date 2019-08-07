@@ -106,7 +106,8 @@ namespace LiveCharts.Wpf.Charts.Base
             DrawMargin.Background = Brushes.Transparent; // if this line is not set, then it does not detect mouse down event...
             DrawMargin.MouseDown += OnDraggingStart;
             DrawMargin.MouseUp += OnDraggingEnd;
-            DrawMargin.MouseMove += DragSection;
+            //DrawMargin.MouseMove += DragSection;
+            Canvas.MouseMove += DragSection;
             DrawMargin.MouseMove += PanOnMouseMove;
             MouseUp += DisableSectionDragMouseUp;
 
@@ -1401,11 +1402,14 @@ namespace LiveCharts.Wpf.Charts.Base
 
             if (ax.Model.Source == AxisOrientation.X)
             {
-                delta = this.ConvertToChartValues(new Point(Ldsp.Value.X, 0), ax.Model.AxisIndex).X -
-                        this.ConvertToChartValues(new Point(p.X, 0), ax.Model.AxisIndex).X;
-                Ldsp = p;
+                //delta = this.ConvertToChartValues(new Point(Ldsp.Value.X, 0), ax.Model.AxisIndex).X -
+                //        this.ConvertToChartValues(new Point(p.X, 0), ax.Model.AxisIndex).X;
+                //Ldsp = p;
 
-                var newAxisValue = ax.Value - delta;
+                var chartXValueAtX = this.ConvertToChartValues(new Point(p.X, 0), ax.Model.AxisIndex).X;
+
+                //var newAxisValue = ax.Value - delta;
+                var newAxisValue = chartXValueAtX;
 
                 var currentAxis = this.AxisX[ax.Model.AxisIndex];
 
@@ -1414,7 +1418,29 @@ namespace LiveCharts.Wpf.Charts.Base
                 else if (newAxisValue > currentAxis.ActualMaxValue)
                     ax.Value = currentAxis.ActualMaxValue;
                 else
-                    ax.Value = newAxisValue;
+                {
+                    if (Series.Any())
+                    {
+                        ISeriesView series = null;
+                        foreach (var s in Series)
+                        {
+                            if (s.Values.Count > 0)
+                            {
+                                series = s;
+                            }
+                        }
+
+                        if (series != null)
+                        {
+                            var closestPoint = series.ClosestPointTo(newAxisValue, AxisOrientation.X);
+                            ax.Value = closestPoint.X;
+                        }
+                        else
+                            ax.Value = newAxisValue;
+                    }
+                    else
+                        ax.Value = newAxisValue;
+                }
             }
             else
             {

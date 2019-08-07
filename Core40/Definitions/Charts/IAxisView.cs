@@ -27,7 +27,7 @@ using LiveCharts.Dtos;
 namespace LiveCharts.Definitions.Charts
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public interface IAxisView
     {
@@ -66,6 +66,20 @@ namespace LiveCharts.Definitions.Charts
         /// The minimum value.
         /// </value>
         double MinValue { get; set; }
+        /// <summary>
+        /// Gets or sets the maximum value.
+        /// </summary>
+        /// <value>
+        /// The maximum value.
+        /// </value>
+        double MaxLimit { get; set; }
+        /// <summary>
+        /// Gets or sets the minimum value.
+        /// </summary>
+        /// <value>
+        /// The minimum value.
+        /// </value>
+        double MinLimit { get; set; }
         /// <summary>
         /// Gets or sets the minimum range.
         /// </summary>
@@ -186,5 +200,10 @@ namespace LiveCharts.Definitions.Charts
         /// <param name="min">The minimum.</param>
         /// <param name="max">The maximum.</param>
         void SetRange(double min, double max);
+        /// <summary>
+        /// Moves the range.
+        /// </summary>
+        /// <param name="change">The offset to move the visible area by (negative for left/down).</param>
+        void MoveRange(double change);
     }
 }

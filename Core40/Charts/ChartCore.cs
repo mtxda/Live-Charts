@@ -31,7 +31,7 @@ using LiveCharts.Dtos;
 namespace LiveCharts.Charts
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public abstract class ChartCore
     {
@@ -62,7 +62,7 @@ namespace LiveCharts.Charts
 
         #endregion
 
-        #region Properties 
+        #region Properties
 
         /// <summary>
         /// Gets or sets the configurations.
@@ -223,7 +223,7 @@ namespace LiveCharts.Charts
         /// </summary>
         public virtual void RunSpecializedChartComponents()
         {
-            
+
         }
 
         /// <summary>
@@ -502,7 +502,7 @@ namespace LiveCharts.Charts
                     var ax = AxisY[index];
 
                     var py = ChartFunctions.FromPlotArea(pivot.Y, AxisOrientation.Y, this, index);
-                    
+
                     var max = double.IsNaN(ax.View.MaxValue) ? ax.TopLimit : ax.View.MaxValue;
                     var min = double.IsNaN(ax.View.MinValue) ? ax.BotLimit : ax.View.MinValue;
                     var l = max - min;
@@ -544,12 +544,11 @@ namespace LiveCharts.Charts
             {
                 for (var index = 0; index < AxisX.Count; index++)
                 {
-                    var xi = AxisX[index];
+                    var ax = AxisX[index];
                     var dx = ChartFunctions.FromPlotArea(delta.X, AxisOrientation.X, this, index) -
                              ChartFunctions.FromPlotArea(0, AxisOrientation.X, this, index);
 
-                    xi.View.SetRange((double.IsNaN(xi.View.MinValue) ? xi.BotLimit : xi.View.MinValue) + dx,
-                        (double.IsNaN(xi.View.MaxValue) ? xi.TopLimit : xi.View.MaxValue) + dx);
+                    ax.View.MoveRange(dx);
                 }
             }
 
@@ -564,8 +563,7 @@ namespace LiveCharts.Charts
                     var dy = ChartFunctions.FromPlotArea(delta.Y, AxisOrientation.Y, this, index) -
                              ChartFunctions.FromPlotArea(0, AxisOrientation.Y, this, index);
 
-                    ax.View.SetRange((double.IsNaN(ax.View.MinValue) ? ax.BotLimit : ax.View.MinValue) + dy,
-                        (double.IsNaN(ax.View.MaxValue) ? ax.TopLimit : ax.View.MaxValue) + dy);
+                    ax.View.MoveRange(dy);
                 }
             }
         }
@@ -721,7 +719,7 @@ namespace LiveCharts.Charts
                 var view = series[0] as IAreaPoint;
                 firstR = view != null ? view.GetPointDiameter() : 0;
             }
-            
+
             //                     [ max, min, pointRadius ]
             var boundries = new[] {first.Max, first.Min, firstR};
 
